@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { supabase } from "../lib/supabase.js";
-import { buildRubricPrompt, type TextType } from "../lib/rubrics.js";
+import { supabase } from "../supabase";
+import { buildRubricPrompt, type TextType } from "../rubrics";
 
 /**
  * Tool: grade_writing_submission

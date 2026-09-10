@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { supabase } from "../lib/supabase.js";
+import { supabase } from "../supabase";
 
 /**
  * Tool: publish_material
