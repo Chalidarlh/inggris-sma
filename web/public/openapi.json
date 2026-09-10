@@ -1,0 +1,143 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "MCP Inggris ChatGPT Actions",
+    "description": "API untuk mengelola materi dan penilaian bahasa Inggris menggunakan sistem MCP.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://inggris-sma.vercel.app",
+      "description": "Production Server"
+    }
+  ],
+  "paths": {
+    "/api/chatgpt/create_material": {
+      "post": {
+        "operationId": "createMaterial",
+        "summary": "Buat materi atau soal baru",
+        "description": "Membuat draft materi ke database berdasarkan week_id, class_id, dan skill_type.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "week_id": { "type": "string" },
+                  "class_id": { "type": "string" },
+                  "skill_type": { "type": "string", "enum": ["reading", "writing", "listening", "speaking"] },
+                  "content": { "type": "string" },
+                  "metadata": { "type": "object" }
+                },
+                "required": ["week_id", "class_id", "skill_type", "content"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Berhasil membuat materi" }
+        }
+      }
+    },
+    "/api/chatgpt/get_pending_materials": {
+      "post": {
+        "operationId": "getPendingMaterials",
+        "summary": "Ambil daftar materi berstatus DRAFT",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "class_id": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Daftar materi yang menunggu review" }
+        }
+      }
+    },
+    "/api/chatgpt/publish_material": {
+      "post": {
+        "operationId": "publishMaterial",
+        "summary": "Publikasikan materi",
+        "description": "Mengubah status materi dari DRAFT menjadi PUBLISHED.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "material_id": { "type": "string" }
+                },
+                "required": ["material_id"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Materi berhasil dipublikasikan" }
+        }
+      }
+    },
+    "/api/chatgpt/grade_writing_submission": {
+      "post": {
+        "operationId": "gradeWritingSubmission",
+        "summary": "Nilai tulisan siswa",
+        "description": "Jika dipanggil dengan submission_id saja, mengembalikan teks + rubrik. Jika dipanggil dengan ai_scores dan ai_feedback, menyimpan nilai ke database.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "submission_id": { "type": "string" },
+                  "ai_scores": {
+                    "type": "object",
+                    "additionalProperties": { "type": "number" }
+                  },
+                  "ai_feedback": { "type": "string" }
+                },
+                "required": ["submission_id"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Berhasil mengambil rubrik atau menyimpan nilai" }
+        }
+      }
+    },
+    "/api/chatgpt/approve_grade": {
+      "post": {
+        "operationId": "approveGrade",
+        "summary": "Setujui nilai siswa",
+        "description": "Mengubah status nilai dari DRAFT menjadi APPROVED.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "grade_id": { "type": "string" }
+                },
+                "required": ["grade_id"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Nilai berhasil disetujui" }
+        }
+      }
+    }
+  }
+}
