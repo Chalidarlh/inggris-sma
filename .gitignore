@@ -1,0 +1,26 @@
+# env files — berisi secret keys, JANGAN commit
+.env
+.env.local
+.env*.local
+
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+.next/
+out/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+npm-debug.log*
+*.log

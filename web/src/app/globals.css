@@ -1,0 +1,236 @@
+/**
+ * globals.css — Design System MCP Inggris
+ * Sesuai design-system.md: token warna Ink/Paper/Gold/Sage/Clay,
+ * tipografi Source Serif 4 + Public Sans dari Google Fonts.
+ *
+ * PENTING: Semua @import HARUS di urutan paling atas (spesifikasi CSS).
+ * Tailwind v4: konfigurasi token lewat @theme di CSS, bukan tailwind.config.ts
+ */
+
+/* ============================================================
+   Imports — WAJIB di atas semua rule lainnya
+   ============================================================ */
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+/* Google Fonts dimuat via next/font di layout.tsx — tidak di-import di CSS
+   karena akan menyebabkan error setelah Turbopack meng-expand @import */
+
+/* ============================================================
+   Design Tokens (Tailwind v4 @theme)
+   Token warna sesuai design-system.md bagian 1
+   ============================================================ */
+
+@theme {
+  /* ----- Color Palette ----- */
+
+  /* Ink: Biru tinta gelap — elemen utama, header, tombol primer */
+  --color-ink: #24344d;
+  --color-ink-50: #eef1f5;
+  --color-ink-100: #d4dce8;
+  --color-ink-200: #a9b9d1;
+  --color-ink-300: #7e96ba;
+  --color-ink-400: #5373a3;
+  --color-ink-500: #3a5a8c;
+  --color-ink-600: #2e4870;
+  --color-ink-700: #243654;
+  --color-ink-800: #1a2640;
+  --color-ink-900: #10182b;
+
+  /* Paper: Latar kertas hangat — background utama */
+  --color-paper: #f1eee6;
+  --color-paper-dark: #e4e0d5;
+
+  /* Surface: Kartu/panel di atas Paper */
+  --color-surface: #ffffff;
+
+  /* Gold: Accent/pencapaian — status published/approved */
+  --color-gold: #c68a2d;
+  --color-gold-light: #f5e6c8;
+  --color-gold-dark: #9e6e24;
+
+  /* Sage: Sukses/benar — progres tercapai, konfirmasi positif */
+  --color-sage: #4c7a5e;
+  --color-sage-light: #d4eadc;
+  --color-sage-dark: #3a5e47;
+
+  /* Clay: Perlu perhatian — draft/menunggu review (bukan error merah) */
+  --color-clay: #b85c38;
+  --color-clay-light: #f5ddd5;
+  --color-clay-dark: #8f4529;
+
+  /* ----- Typography ----- */
+  /* Referensi ke CSS variables yang di-set oleh next/font di layout.tsx */
+  --font-serif: var(--font-source-serif-4), Georgia, serif;
+  --font-sans: var(--font-public-sans), system-ui, sans-serif;
+  --font-mono: ui-monospace, monospace;
+
+  /* ----- Border Radius ----- */
+  --radius-badge: 9999px;
+  --radius-card: 0.75rem;
+  --radius-button: 0.5rem;
+}
+
+/* ============================================================
+   shadcn/ui CSS Variables (dibutuhkan oleh komponen shadcn)
+   ============================================================ */
+:root {
+  color-scheme: light;
+
+  /* Mapping ke token design system kita */
+  --background: #f1eee6;        /* Paper */
+  --foreground: #24344d;        /* Ink */
+  --card: #ffffff;              /* Surface */
+  --card-foreground: #24344d;   /* Ink */
+  --popover: #ffffff;
+  --popover-foreground: #24344d;
+  --primary: #24344d;           /* Ink */
+  --primary-foreground: #f1eee6; /* Paper */
+  --secondary: #e4e0d5;         /* Paper Dark */
+  --secondary-foreground: #24344d;
+  --muted: #e4e0d5;
+  --muted-foreground: #6b7280;
+  --accent: #c68a2d;            /* Gold */
+  --accent-foreground: #ffffff;
+  --destructive: #b85c38;       /* Clay */
+  --border: rgba(36, 52, 77, 0.12); /* Ink/12 */
+  --input: rgba(36, 52, 77, 0.12);
+  --ring: #24344d;
+  --radius: 0.5rem;
+
+  /* Sidebar */
+  --sidebar: #24344d;
+  --sidebar-foreground: #f1eee6;
+  --sidebar-primary: #c68a2d;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: rgba(255,255,255,0.1);
+  --sidebar-accent-foreground: #f1eee6;
+  --sidebar-border: rgba(255,255,255,0.1);
+  --sidebar-ring: #c68a2d;
+}
+
+/* ============================================================
+   Tailwind v4 theme inline — mapping CSS vars ke Tailwind utilities
+   ============================================================ */
+@theme inline {
+  --font-sans: var(--font-sans);
+  --font-serif: var(--font-serif);
+  --font-mono: var(--font-mono);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) * 0.75);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) * 1.5);
+  --radius-xl: calc(var(--radius) * 2);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+/* ============================================================
+   Dark mode variant (shadcn requirement)
+   ============================================================ */
+@custom-variant dark (&:is(.dark *));
+
+/* ============================================================
+   Base Styles
+   ============================================================ */
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html {
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    line-height: 1.6;
+  }
+}
+
+/* ============================================================
+   Typography Utilities
+   ============================================================ */
+
+.font-serif {
+  font-family: var(--font-serif);
+}
+
+/* Reading passage — batasi line-length untuk keterbacaan materi */
+.prose-reading {
+  max-width: 65ch;
+}
+
+/* ============================================================
+   Status Badge Utilities
+   Sesuai design-system.md bagian 4: Clay/Gold/Sage
+   ============================================================ */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-badge);
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.badge-clay {
+  background-color: var(--color-clay-light);
+  color: var(--color-clay-dark);
+}
+
+.badge-gold {
+  background-color: var(--color-gold-light);
+  color: var(--color-gold-dark);
+}
+
+.badge-sage {
+  background-color: var(--color-sage-light);
+  color: var(--color-sage-dark);
+}
+
+/* ============================================================
+   Transition Utilities
+   Sesuai design-system.md prinsip: "Satu momen animasi"
+   — hanya transisi perubahan status, bukan hover semua elemen
+   ============================================================ */
+
+.transition-status {
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+/* ============================================================
+   Table / Gradebook Utilities (Sisi Guru)
+   ============================================================ */
+
+.table-row-hover:hover {
+  background-color: var(--color-paper-dark);
+  cursor: pointer;
+}
