@@ -39,7 +39,10 @@ export async function middleware(request: NextRequest) {
   // Proteksi route — redirect ke /login jika belum login
   const pathname = request.nextUrl.pathname;
   const isAuthRoute = pathname === "/login" || pathname === "/auth/callback";
-  const isPublicRoute = pathname === "/" || isAuthRoute;
+  // /api/mcp → MCP server untuk ChatGPT Plugin (tidak perlu auth)
+  // /api/chatgpt/* → REST bridge untuk ChatGPT Actions (tidak perlu auth)
+  const isApiRoute = pathname.startsWith("/api/mcp") || pathname.startsWith("/api/chatgpt");
+  const isPublicRoute = pathname === "/" || isAuthRoute || isApiRoute;
 
   if (!user && !isPublicRoute) {
     const loginUrl = request.nextUrl.clone();
