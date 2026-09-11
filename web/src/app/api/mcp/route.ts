@@ -1,72 +1,31 @@
 export const runtime = "nodejs";
 
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
 import { createMcpServer } from "@/lib/mcp-logic";
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-const WELL_KNOWN_URL = `${BASE_URL}/.well-known/oauth-protected-resource`;
-
-function getBaseUrl(req: NextRequest): string {
-  const host = req.headers.get("host") ?? "";
-  const proto = req.headers.get("x-forwarded-proto") ?? "http";
-  return host ? `${proto}://${host}` : BASE_URL;
-}
-
-// ─── GET — health check atau SSE handshake ──────────────────────────
-
-export async function GET(req: NextRequest) {
-  const accept = req.headers.get("accept") ?? "";
-  const base = getBaseUrl(req);
-
-  // SSE / Streamable HTTP handshake
-  if (accept.includes("text/event-stream")) {
-    return new NextResponse(null, {
-      status: 200,
-      headers: {
-        "Content-Type": "text/event-stream",
-        "Cache-Control": "no-cache",
-        Connection: "keep-alive",
-        "X-Accel-Buffering": "no",
-        Link: `<${base}/.well-known/oauth-protected-resource>; rel="oauth-protected-resource"`,
-      },
-    });
-  }
-
-  // Browser health check
-  return new NextResponse("MCP Inggris Server (Stateless) is active. Ready for connections.", {
-    headers: {
-      "Content-Type": "text/plain",
-      Link: `<${WELL_KNOWN_URL}>; rel="oauth-protected-resource"`,
-    },
-  });
-}
-
-// ─── POST — JSON-RPC MCP requests ───────────────────────────────────
-
-export async function POST(req: NextRequest) {
+// Buat instance server dan transport per request (karena stateless/serverless)
+async function handleMcpRequest(req: NextRequest) {
   try {
     const server = createMcpServer();
     const transport = new WebStandardStreamableHTTPServerTransport({
-      sessionIdGenerator: undefined, // stateless — required for serverless API routes
+      sessionIdGenerator: undefined, // stateless mode untuk Vercel
     });
 
     await server.connect(transport);
-
-    const response = await transport.handleRequest(req);
-
-    // Pastikan streaming-friendly headers terpasang
-    const headers = new Headers(response.headers);
-    headers.set("X-Accel-Buffering", "no");
-    headers.set("Cache-Control", "no-cache");
-
-    return new NextResponse(response.body, {
-      status: response.status,
-      headers,
+    
+    // Biarkan SDK yang menangani baik request GET (SSE Handshake) maupun POST (Message)
+    return await transport.handleRequest(req);
+    
+  } catch (error: any) {
+    console.error("[MCP] Request error:", error);
+    return new Response(JSON.stringify({ error: error.message }), { 
+      status: 500,
+      headers: { "Content-Type": "application/json" }
     });
-  } catch (error: unknown) {
-    console.error("[MCP] POST error:", error);
-    const msg = error instanceof Error ? error.message : "Internal Server Error";
-    return NextResponse.json({ error: msg }, { status: 500 });
   }
 }
+
+// Gunakan handler yang sama untuk GET dan POST
+export const GET = handleMcpRequest;
+export const POST = handleMcpRequest;
