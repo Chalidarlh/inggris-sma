@@ -1,22 +1,21 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "MCP Inggris ChatGPT Actions",
-    "description": "API untuk mengelola materi dan penilaian bahasa Inggris menggunakan sistem MCP.",
+    "title": "MCP Server API (JSON-RPC)",
+    "description": "API untuk mengeksekusi tools MCP menggunakan protokol JSON-RPC standar.",
     "version": "1.0.0"
   },
   "servers": [
     {
-      "url": "https://inggris-sma.vercel.app",
-      "description": "Production Server"
+      "url": "https://inggris-sma.vercel.app"
     }
   ],
   "paths": {
-    "/api/chatgpt/create_material": {
+    "/api/mcp": {
       "post": {
-        "operationId": "createMaterial",
-        "summary": "Buat materi atau soal baru",
-        "description": "Membuat draft materi ke database berdasarkan week_id, class_id, dan skill_type.",
+        "operationId": "callMcpTool",
+        "summary": "Panggil Tool MCP",
+        "description": "Endpoint utama untuk memanggil tools MCP. Harus menggunakan format JSON-RPC 2.0.",
         "requestBody": {
           "required": true,
           "content": {
@@ -24,118 +23,127 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "week_id": { "type": "string" },
-                  "class_id": { "type": "string" },
-                  "skill_type": { "type": "string", "enum": ["reading", "writing", "listening", "speaking"] },
-                  "content": { "type": "string" },
-                  "metadata": { "type": "object" }
-                },
-                "required": ["week_id", "class_id", "skill_type", "content"]
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": { "description": "Berhasil membuat materi" }
-        }
-      }
-    },
-    "/api/chatgpt/get_pending_materials": {
-      "post": {
-        "operationId": "getPendingMaterials",
-        "summary": "Ambil daftar materi berstatus DRAFT",
-        "requestBody": {
-          "required": false,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "class_id": { "type": "string" }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": { "description": "Daftar materi yang menunggu review" }
-        }
-      }
-    },
-    "/api/chatgpt/publish_material": {
-      "post": {
-        "operationId": "publishMaterial",
-        "summary": "Publikasikan materi",
-        "description": "Mengubah status materi dari DRAFT menjadi PUBLISHED.",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "material_id": { "type": "string" }
-                },
-                "required": ["material_id"]
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": { "description": "Materi berhasil dipublikasikan" }
-        }
-      }
-    },
-    "/api/chatgpt/grade_writing_submission": {
-      "post": {
-        "operationId": "gradeWritingSubmission",
-        "summary": "Nilai tulisan siswa",
-        "description": "Jika dipanggil dengan submission_id saja, mengembalikan teks + rubrik. Jika dipanggil dengan ai_scores dan ai_feedback, menyimpan nilai ke database.",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "submission_id": { "type": "string" },
-                  "ai_scores": {
-                    "type": "object",
-                    "additionalProperties": { "type": "number" }
+                  "jsonrpc": {
+                    "type": "string",
+                    "enum": ["2.0"]
                   },
-                  "ai_feedback": { "type": "string" }
+                  "method": {
+                    "type": "string",
+                    "enum": ["tools/call"]
+                  },
+                  "params": {
+                    "type": "object",
+                    "oneOf": [
+                      {
+                        "title": "create_material",
+                        "description": "Buat materi atau soal baru untuk minggu tertentu.",
+                        "properties": {
+                          "name": {
+                            "type": "string",
+                            "enum": ["create_material"]
+                          },
+                          "arguments": {
+                            "type": "object",
+                            "properties": {
+                              "week_id": { "type": "string" },
+                              "class_id": { "type": "string" },
+                              "skill_type": { "type": "string", "enum": ["reading", "writing", "listening", "speaking"] },
+                              "content": { "type": "string" },
+                              "metadata": { "type": "object" }
+                            },
+                            "required": ["week_id", "class_id", "skill_type", "content"]
+                          }
+                        },
+                        "required": ["name", "arguments"]
+                      },
+                      {
+                        "title": "get_pending_materials",
+                        "description": "Ambil daftar materi dengan status DRAFT yang menunggu review.",
+                        "properties": {
+                          "name": {
+                            "type": "string",
+                            "enum": ["get_pending_materials"]
+                          },
+                          "arguments": {
+                            "type": "object",
+                            "properties": {
+                              "class_id": { "type": "string" }
+                            }
+                          }
+                        },
+                        "required": ["name", "arguments"]
+                      },
+                      {
+                        "title": "publish_material",
+                        "description": "Publikasikan materi (ubah status DRAFT menjadi PUBLISHED).",
+                        "properties": {
+                          "name": {
+                            "type": "string",
+                            "enum": ["publish_material"]
+                          },
+                          "arguments": {
+                            "type": "object",
+                            "properties": {
+                              "material_id": { "type": "string" }
+                            },
+                            "required": ["material_id"]
+                          }
+                        },
+                        "required": ["name", "arguments"]
+                      },
+                      {
+                        "title": "grade_writing_submission",
+                        "description": "Ambil rubrik (berikan submission_id saja) ATAU simpan nilai tulisan siswa (berikan ai_scores & ai_feedback).",
+                        "properties": {
+                          "name": {
+                            "type": "string",
+                            "enum": ["grade_writing_submission"]
+                          },
+                          "arguments": {
+                            "type": "object",
+                            "properties": {
+                              "submission_id": { "type": "string" },
+                              "ai_scores": {
+                                "type": "object",
+                                "additionalProperties": { "type": "number" }
+                              },
+                              "ai_feedback": { "type": "string" }
+                            },
+                            "required": ["submission_id"]
+                          }
+                        },
+                        "required": ["name", "arguments"]
+                      },
+                      {
+                        "title": "approve_grade",
+                        "description": "Setujui nilai tulisan siswa (ubah status DRAFT menjadi APPROVED).",
+                        "properties": {
+                          "name": {
+                            "type": "string",
+                            "enum": ["approve_grade"]
+                          },
+                          "arguments": {
+                            "type": "object",
+                            "properties": {
+                              "grade_id": { "type": "string" }
+                            },
+                            "required": ["grade_id"]
+                          }
+                        },
+                        "required": ["name", "arguments"]
+                      }
+                    ]
+                  }
                 },
-                "required": ["submission_id"]
+                "required": ["jsonrpc", "method", "params"]
               }
             }
           }
         },
         "responses": {
-          "200": { "description": "Berhasil mengambil rubrik atau menyimpan nilai" }
-        }
-      }
-    },
-    "/api/chatgpt/approve_grade": {
-      "post": {
-        "operationId": "approveGrade",
-        "summary": "Setujui nilai siswa",
-        "description": "Mengubah status nilai dari DRAFT menjadi APPROVED.",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "grade_id": { "type": "string" }
-                },
-                "required": ["grade_id"]
-              }
-            }
+          "200": {
+            "description": "Respon JSON-RPC yang berisi hasil dari pemanggilan tool."
           }
-        },
-        "responses": {
-          "200": { "description": "Nilai berhasil disetujui" }
         }
       }
     }
