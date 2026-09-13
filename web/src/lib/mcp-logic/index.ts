@@ -11,6 +11,10 @@ import {
   gradeWritingSchema,
   approveGrade,
   approveGradeSchema,
+  findWeek,              // <- tambahan
+  findWeekSchema,        // <- tambahan
+  findClass,             // <- tambahan
+  findClassSchema,
 } from "./tools";
 
 /**
@@ -20,8 +24,43 @@ import {
 export function createMcpServer() {
   const server = new McpServer({
     name: "mcp-inggris",
-    version: "0.2.0", // Naik versi untuk integrasi Next.js
+    version: "0.2.0",
   });
+
+  // ============================================================
+  // Kelompok 0: Pencarian/Lookup (dipanggil otomatis oleh Claude
+  // untuk menerjemahkan nomor minggu/nama kelas menjadi UUID)
+  // ============================================================
+
+  server.tool(
+    "find_week",
+    "Cari data minggu berdasarkan nomor urutnya (misalnya 1 untuk minggu pertama). " +
+    "Mengembalikan week_id (UUID) beserta detail grammar_point dan text_type minggu tersebut. " +
+    "WAJIB dipanggil dulu sebelum create_material jika user menyebutkan nomor minggu biasa, " +
+    "bukan UUID langsung.",
+    findWeekSchema.shape,
+    async (input) => {
+      const result = await findWeek(input as Parameters<typeof findWeek>[0]);
+      return {
+        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+      };
+    }
+  );
+
+  server.tool(
+    "find_class",
+    "Cari data kelas berdasarkan nama kelasnya (misalnya 'XI IPA 1'). " +
+    "Mengembalikan class_id (UUID) yang sesuai. " +
+    "WAJIB dipanggil dulu sebelum create_material atau tool lain yang butuh class_id, " +
+    "jika user menyebutkan nama kelas biasa, bukan UUID langsung.",
+    findClassSchema.shape,
+    async (input) => {
+      const result = await findClass(input as Parameters<typeof findClass>[0]);
+      return {
+        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+      };
+    }
+  );
 
   // ============================================================
   // Kelompok 1: Pembuatan Materi (dipanggil guru)
@@ -32,7 +71,9 @@ export function createMcpServer() {
     "Buat materi atau soal baru untuk minggu tertentu berdasarkan kurikulum. " +
     "Tool ini mengambil data grammar_point dan text_type dari tabel weeks, " +
     "lalu menyimpan draft materi ke database. " +
-    "Gunakan setelah menentukan week_id, class_id, dan skill_type yang ingin dibuat.",
+    "PENTING: week_id dan class_id harus berupa UUID. Jika user menyebutkan nomor minggu " +
+    "biasa (misalnya 'minggu pertama') atau nama kelas biasa (misalnya 'XI IPA 1'), " +
+    "panggil find_week dan find_class terlebih dahulu untuk mendapatkan UUID yang sesuai.",
     createMaterialSchema.shape,
     async (input) => {
       const result = await createMaterial(input as Parameters<typeof createMaterial>[0]);
