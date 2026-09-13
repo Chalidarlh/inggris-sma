@@ -15,10 +15,15 @@ import { supabase } from "../supabase";
  */
 
 export const createMaterialSchema = z.object({
-  week_id: z.string().uuid().describe("ID minggu dari tabel weeks (UUID)"),
-  class_id: z.string().uuid().describe("ID kelas yang akan menerima materi (UUID)"),
-  skill_type: z
-    .enum(["reading", "writing", "listening"])
+  week_id: z.string().uuid().describe(
+    "ID minggu (UUID). Jika user menyebutkan nomor minggu biasa (misalnya 'minggu pertama' atau 'minggu 5'), " +
+    "panggil tool find_week terlebih dahulu untuk mendapatkan UUID yang sesuai."
+  ),
+  class_id: z.string().uuid().describe(
+    "ID kelas (UUID). Jika user menyebutkan nama kelas biasa (misalnya 'XI IPA 1'), " +
+    "panggil tool find_class terlebih dahulu untuk mendapatkan UUID yang sesuai."
+  ),
+  skill_type: z.enum(["reading", "writing", "listening"])
     .describe("Jenis skill: reading, writing, atau listening"),
 });
 

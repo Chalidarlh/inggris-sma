@@ -13,3 +13,5 @@ export { getPendingMaterials, getPendingMaterialsSchema } from "./get-pending-ma
 export { publishMaterial, publishMaterialSchema } from "./publish-material";
 export { gradeWritingSubmission, gradeWritingSchema } from "./grade-submission";
 export { approveGrade, approveGradeSchema } from "./approve-grade";
+export { findClass, findClassSchema } from "./find-class";
+export { findWeek, findWeekSchema } from "./find-week";
