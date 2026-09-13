@@ -1,3 +1,5 @@
+import fs from "fs";
+import path from "path";
 import { z } from "zod";
 import { supabase } from "../supabase";
 
@@ -44,6 +46,16 @@ export async function createMaterial(input: CreateMaterialInput) {
   // opsional agar bisa juga dipakai untuk menyimpan konten yang sudah dibuat.
 
   const title = `Materi ${week.skill_type || input.skill_type} — Minggu ${week.week_number}: ${week.title}`;
+  // 2b. Baca kurikulum resmi dari file markdown sebagai referensi AI
+  let curriculumReference: string | null = null;
+  try {
+    const curriculumPath = path.join(process.cwd(), "docs", "curriculum", "kurikulum-inggris.md");
+    curriculumReference = fs.readFileSync(curriculumPath, "utf-8");
+  } catch {
+    // File tidak wajib ada — jika tidak ditemukan, lanjut tanpa referensi
+    curriculumReference = null;
+  }
+
   const contextInfo = {
     week_number: week.week_number,
     phase: week.phase,
@@ -51,6 +63,7 @@ export async function createMaterial(input: CreateMaterialInput) {
     grammar_point: week.grammar_point,
     text_type: week.text_type,
     requested_skill: input.skill_type,
+    curriculum_reference: curriculumReference,
   };
 
   // 3. Simpan ke tabel materials dengan status draft
